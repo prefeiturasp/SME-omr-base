@@ -57,6 +57,16 @@ class BaseBusiness {
         this.Repository.GetCount(where, _callback, parentField, parentValue);
     }
 
+     /**
+     * Get Documents Count matching the arguments
+     * @param where             {Object=}           Conditions
+     * @param _callback         {Function}          Callback Function     
+     * @callback _callback
+     */
+    Count (where, _callback) {
+        this.Repository.Count(where, _callback);
+    }
+
     /**
      * Get Distinct value in
      * @param field             {String}            Field Name
