@@ -110,6 +110,19 @@ class BaseRepository {
     }
 
     /**
+     * Get Documents Count matching the arguments
+     * @param where             {Object=}           Conditions
+     * @param _callback         {Function}          Callback Function     
+     * @callback _callback
+     */
+    Count(where, _callback) {
+        if (!where) where = {};
+        this.Entity.count(where).exec().then((result) => {
+            _callback(result, where);
+        });
+    }
+
+    /**
      * Get Distinct value in
      * @param field             {String}            Field Name
      * @param where             {Object=}           Conditions
