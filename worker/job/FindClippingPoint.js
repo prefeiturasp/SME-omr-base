@@ -1,9 +1,7 @@
 'use strict';
 var BaseJob;
 BaseJob = require('./_BaseJob');
-let fs = require('fs');
 let jsfeat = require('jsfeat');
-const { loadImage } = require('canvas');
 
 class FindClippingPoint extends BaseJob {
     /**
@@ -12,14 +10,19 @@ class FindClippingPoint extends BaseJob {
      * @param canvas {Object} canvas
      * @param context {Object} context canvas
      * @param image {Object} image
+     * @param instanceImage {Function} instance image Canvas
      * @callback
      */
-    static Run(canvas, context, image, Config) {
+    static Run(canvas, context, image, instanceImage, Config) {
 
         let landscapeImage = canvas.width > canvas.height;
         let imgsrc = canvas.toDataURL();
-        loadImage(imgsrc)
-        .then((insImage) => {
+        
+        try
+        {
+            var insImage = new instanceImage;
+            insImage.src = imgsrc;
+
             if(landscapeImage)
                 FindClippingPoint.CrossRotate90(context, canvas, insImage, true);
 
@@ -37,10 +40,11 @@ class FindClippingPoint extends BaseJob {
 
             image.data = context.getImageData(0, 0, canvas.width, canvas.height);
             FindClippingPoint.callback();
-        })
-        .catch((error) => {
-            FindClippingPoint.callback(error);
-        });
+        }
+        catch(err)
+        {
+            FindClippingPoint.callback(err);
+        }
     }
 
     static CrossRotate90(context, canvas, insImage, rotateLeft) {
