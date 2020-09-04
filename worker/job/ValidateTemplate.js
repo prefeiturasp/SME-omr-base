@@ -64,7 +64,7 @@ class ValidateTemplate extends BaseJob {
             //console.log(lastTileFill);
 
             if (!firstTileFill || centerTileFill || !lastTileFill) {
-                ValidateTemplate.callback(new Error("Pattern template not found"));
+                ValidateTemplate.callback(new Error("Pattern template not found. First:" + firstTileFill + " Center:" + centerTileFill + " Last:" + lastTileFill));
             } else {
                 ValidateTemplate.callback();
             }

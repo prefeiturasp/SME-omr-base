@@ -176,6 +176,8 @@ class WorkerManager {
             DrawImage: 'DrawImage',
             EqualizeImage: 'EqualizeImage',
             FilterCorner: 'FilterCorner',
+            FilterResponseCorners: 'FilterResponseCorners',
+            FindClippingPoint: 'FindClippingPoint',
             GetFillPercent: 'GetFillPercent',
             ImageBin: 'ImageBin',
             PrepareCornerDetection: 'PrepareCornerDetection',

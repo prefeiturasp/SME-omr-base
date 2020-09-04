@@ -50,51 +50,27 @@ class AlignImage extends BaseJob {
             }
 
             //console.log("----------");
-            for (let i = 0; i < jsfeat.countCorners; ++i) {
+            let leftSmallerCorner = AlignImage.GetSmallerLeftCornerPoint(jsfeat.corners, centerTemplate);
+            let rightSmallerCorner = AlignImage.GetSmallerRightCornerPoint(jsfeat.corners, centerTemplate);
 
-                //left canvas
-                if (jsfeat.corners[i].x < centerTemplate) {
-
-                    //find corner smaller y AND get your x
-                    if (jsfeat.corners[i].y < leftCorners.smallerY) {
-                        leftCorners.smallerY = jsfeat.corners[i].y;
-                        leftCorners.xSmallerY = jsfeat.corners[i].x;
-                    }
-
-                } else { //right canvas
-
-                    //find corner smaller y AND get your x
-                    if (jsfeat.corners[i].y < rightCorners.smallerY) {
-                        rightCorners.smallerY = jsfeat.corners[i].y;
-                        rightCorners.xSmallerY = jsfeat.corners[i].x;
-                    }
-                }
-
-            }
-
-            // inclined to right
-            if (leftCorners.smallerY < rightCorners.smallerY) {
-
-                cornerTopLeft.x = leftCorners.xSmallerY;
-                cornerTopLeft.y = leftCorners.smallerY;
-                cornerTopRight.x = rightCorners.xSmallerY;
-                cornerTopRight.y = rightCorners.smallerY;
+            if(leftSmallerCorner.y < rightSmallerCorner.y) {
+                cornerTopLeft.x = leftSmallerCorner.x;
+                cornerTopLeft.y = leftSmallerCorner.y;
+                cornerTopRight.x = rightSmallerCorner.x;
+                cornerTopRight.y = rightSmallerCorner.y;
                 registerPointX = cornerTopLeft.x;
                 registerPointY = cornerTopLeft.y;
-
-            } else { // inclined to left
-
-                cornerTopLeft.x = leftCorners.xSmallerY;
-                cornerTopLeft.y = leftCorners.smallerY;
-                cornerTopRight.x = rightCorners.xSmallerY;
-                cornerTopRight.y = rightCorners.smallerY;
+            }
+            else {
+                cornerTopLeft.x = leftSmallerCorner.x;
+                cornerTopLeft.y = leftSmallerCorner.y;
+                cornerTopRight.x = rightSmallerCorner.x;
+                cornerTopRight.y = rightSmallerCorner.y;
                 registerPointX = cornerTopRight.x;
                 registerPointY = cornerTopRight.y;
             }
 
-
-
-            if(leftCorners.smallerY === rightCorners.smallerY){
+            if(leftSmallerCorner.y === rightSmallerCorner.y){
                 AlignImage.callback();
                 return;
             }
@@ -183,6 +159,73 @@ class AlignImage extends BaseJob {
         } catch (err) {
             AlignImage.callback(err);
         }
+    }
+
+    static GetSmallerLeftCornerPoint(corners, centerTemplate) {
+        let leftCornersOrdenedByY = corners
+            .filter(corner => corner.x < centerTemplate)
+            .sort(function (point1, point2) {
+                if (point1.y > point2.y) {
+                    return 1;
+                  }
+                  if (point1.y < point2.y) {
+                    return -1;
+                  }
+                  return 0;
+            });
+
+        for(var i = 0; i < leftCornersOrdenedByY.length; i++)
+        {
+            if(AlignImage.CheckPointIsAnOpticalMark(leftCornersOrdenedByY[i], leftCornersOrdenedByY))
+                return leftCornersOrdenedByY[i];
+        }
+    }
+
+    static GetSmallerRightCornerPoint(corners, centerTemplate) {
+        let rightCornersOrdenedByY = corners
+            .filter(corner => corner.x >= centerTemplate)
+            .sort(function (point1, point2) {
+                if (point1.y > point2.y) {
+                    return 1;
+                  }
+                  if (point1.y < point2.y) {
+                    return -1;
+                  }
+                  return 0;
+            });
+
+        for(var i = 0; i < rightCornersOrdenedByY.length; i++)
+        {
+            if(AlignImage.CheckPointIsAnOpticalMark(rightCornersOrdenedByY[i], rightCornersOrdenedByY))
+                return rightCornersOrdenedByY[i];
+        }
+    }
+
+    static CheckPointIsAnOpticalMark(point, corners, defaultOpticalMarkWidth, rangeX, rangeY) {
+        defaultOpticalMarkWidth = defaultOpticalMarkWidth | 20;
+        rangeX = rangeX | 7;
+        rangeY = rangeY | 7;
+
+        // Check right side of point
+        let referencePointRight = { x: point.x + defaultOpticalMarkWidth, y: point.y };
+        let pointsInRangeOfReferencePointRight = corners.filter(corner => 
+            corner.x >= referencePointRight.x - rangeX &&
+            corner.x <= referencePointRight.x + rangeX &&
+            corner.y >= referencePointRight.y - rangeY &&
+            corner.y <= referencePointRight.y + rangeY);
+        
+        if(pointsInRangeOfReferencePointRight.length <= 0) return false;
+
+        // Check bottom side of point
+        let referencePointBottom = { x: point.x, y: point.y + defaultOpticalMarkWidth};
+        let pointsInRangeOfReferencePointBottom = corners.filter(corner => 
+            corner.x >= referencePointBottom.x - rangeX &&
+            corner.x <= referencePointBottom.x + rangeX &&
+            corner.y >= referencePointBottom.y - rangeY &&
+            corner.y <= referencePointBottom.y + rangeY); 
+
+        if(pointsInRangeOfReferencePointBottom.length <= 0) return false;
+        return true;
     }
 }
 

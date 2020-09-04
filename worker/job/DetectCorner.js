@@ -28,7 +28,7 @@ class DetectCorner extends BaseJob {
             jsfeat.instance.yape06.laplacian_threshold = threshold;
             jsfeat.instance.yape06.min_eigen_value_threshold = threshold;
             jsfeat.countCorners = jsfeat.instance.yape06.detect(jsfeat.instance.img_u8, jsfeat.corners);//returns the number of corners found
-
+            jsfeat.corners = jsfeat.corners.filter(corner => corner.x > 0 || corner.y > 0);
             //keeps the corners visible
             if (renderCorners) {
                 jsfeat.instance.data_u32 = new Uint32Array(image.data.data.buffer);
